@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Assistente CRM</title>
+  <title>Assistente Yoda</title>
   <style>
     :root {
       color-scheme: light;
@@ -27,28 +27,406 @@
       overflow: hidden;
       margin-bottom: 14px;
       border: 1px solid rgba(30, 40, 60, .08);
-      border-radius: 20px;
+      border-radius: 22px;
       background: #fff;
-      box-shadow: 0 18px 55px rgba(37, 44, 72, .2);
+      box-shadow: 0 18px 55px rgba(37, 44, 72, .18);
     }
     .header {
       padding: 20px 20px 17px;
       color: #fff;
-      background: linear-gradient(135deg, #6557d9, #8672ed);
+      background: linear-gradient(135deg, #5848d8 0%, #6d5de2 48%, #8d7af2 100%);
     }
     .header-top { display: flex; align-items: center; gap: 12px; }
     .avatar {
       display: grid;
-      width: 42px;
-      height: 42px;
+      width: 46px;
+      height: 46px;
       place-items: center;
       border: 1px solid rgba(255,255,255,.35);
-      border-radius: 15px;
-      background: rgba(255,255,255,.17);
-      font-size: 23px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 6px 14px rgba(82, 70, 180, .28);
     }
+    .avatar img { width: 42px; height: 42px; object-fit: cover; }
     .heading { flex: 1; }
-    .heading strong { display: block; font-size: 15px; }
+    .heading-title { display: flex; align-items: center; gap: 8px; }
+    .heading strong { display: block; font-size: 15px; letter-spacing: .02em; font-weight: 700; }
+    .crm-shell {
+      position: relative;
+      min-height: 100vh;
+      padding: 0;
+      background: #edf1f4;
+      color: #1e2c3c;
+      font-family: "Segoe UI", sans-serif;
+    }
+    .crm-app {
+      max-width: 1280px;
+      margin: 0 auto;
+      background: #f4f6f9;
+      min-height: 100vh;
+      border-left: 1px solid rgba(20, 35, 58, 0.08);
+      border-right: 1px solid rgba(20, 35, 58, 0.08);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-height: 78px;
+      padding: 0 18px 0 14px;
+      background: #f2f3f5;
+      border-bottom: 1px solid rgba(20, 35, 58, 0.10);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 180px;
+      color: #1d2b3d;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .brand-mark {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+      display: grid;
+      place-items: center;
+    }
+    .brand-mark svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      fill: #2580e8;
+    }
+    .search-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+    }
+    .search {
+      width: min(100%, 700px);
+      height: 34px;
+      border: 1px solid rgba(15, 25, 36, .12);
+      border-radius: 4px;
+      background: #f8f9fb;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: #7a8392;
+      font-size: 13px;
+    }
+    .search:before {
+      content: "⌕";
+      margin-right: 8px;
+      font-size: 16px;
+      color: #7a8392;
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #616c7a;
+      font-size: 18px;
+      padding-left: 8px;
+    }
+    .top-actions .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #f0c14d;
+      display: inline-block;
+    }
+    .subnav {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-height: 52px;
+      padding: 0 18px 0 20px;
+      background: #f5f6f8;
+      border-bottom: 1px solid rgba(20, 35, 58, 0.10);
+      color: #4a5568;
+      font-size: 14px;
+    }
+    .subnav .tab {
+      padding: 16px 0 14px;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      color: #4b586b;
+    }
+    .subnav .tab.active {
+      border-color: #0d8aff;
+      color: #1d2b3d;
+    }
+    .subnav .tab + .tab { margin-left: 8px; }
+    .page {
+      padding: 22px 26px 0;
+      background: #f5f7fa;
+    }
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .header-row h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #1f2d3d;
+      font-weight: 800;
+    }
+    .list-picker { position: relative; }
+    .list-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+    }
+    .list-toggle:focus-visible,
+    .list-option:focus-visible {
+      outline: 2px solid #0d8aff;
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    .list-chevron {
+      width: 0;
+      height: 0;
+      border-top: 6px solid #41536b;
+      border-right: 5px solid transparent;
+      border-left: 5px solid transparent;
+    }
+    .list-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 5;
+      min-width: 230px;
+      padding: 6px;
+      border: 1px solid rgba(20, 35, 58, .14);
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(20, 35, 58, .18);
+    }
+    .list-option {
+      display: block;
+      width: 100%;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #26364b;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      text-align: left;
+    }
+    .list-option:hover,
+    .list-option[aria-checked="true"] {
+      background: #f0f6ff;
+      color: #1264c4;
+    }
+    .header-row .new-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 110px;
+      height: 34px;
+      padding: 0 14px;
+      border: 1px solid #2d7ff9;
+      border-radius: 4px;
+      background: #fff;
+      color: #1d7ef0;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 1px 0 rgba(16,30,50,.02);
+    }
+    .subtext {
+      color: #616d7e;
+      font-size: 12px;
+      margin-bottom: 18px;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 12px;
+      border: 1px solid rgba(20, 35, 58, 0.10);
+      border-radius: 6px;
+      background: #f7f8fa;
+      margin-bottom: 12px;
+    }
+    .search-mini {
+      flex: 0 1 230px;
+      width: 230px;
+      max-width: 100%;
+      margin-left: auto;
+      height: 32px;
+      border: 1px solid rgba(20, 35, 58, 0.12);
+      border-radius: 4px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      color: #7a8392;
+      font-size: 12px;
+    }
+    .search-mini:before {
+      content: "⌕";
+      margin-right: 8px;
+      font-size: 15px;
+    }
+    .search-mini input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #34465e;
+      font: inherit;
+      font-size: 12px;
+    }
+    .search-mini:focus-within {
+      border-color: #2d7ff9;
+      box-shadow: 0 0 0 3px rgba(45, 127, 249, .12);
+    }
+    .filter-box {
+      border: 1px solid rgba(20, 35, 58, 0.12);
+      border-radius: 4px;
+      background: #fff;
+      padding: 7px 12px;
+      font-size: 12px;
+      color: #48556a;
+      min-width: 120px;
+    }
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(20, 35, 58, 0.12);
+      border-radius: 50%;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      color: #5a6577;
+      font-size: 14px;
+    }
+    .table-wrap {
+      border: 1px solid rgba(20, 35, 58, 0.10);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      background: #f7f8fa;
+      color: #4d5a6f;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(20,35,58,0.10);
+    }
+    tbody td {
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(20,35,58,0.08);
+      color: #2d3a50;
+      vertical-align: middle;
+      background: #fff;
+    }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:nth-child(odd) td { background: #fff; }
+    .task-name {
+      color: #2a74d9;
+      font-weight: 600;
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .status-pill.normal { background: #f1f4f8; color: #4e5c6d; }
+    .status-pill.high { background: #ffe5ea; color: #d94867; }
+    .status-pill.low { background: #eaf7ee; color: #317a47; }
+    .edit-link {
+      color: #2a74d9;
+      font-size: 12px;
+      text-decoration: none;
+      border: 1px solid rgba(20,35,58,0.12);
+      border-radius: 4px;
+      padding: 4px 8px;
+      display: inline-block;
+      background: #fff;
+    }
+    .footer-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 18px;
+      border-top: 1px solid rgba(20,35,58,0.10);
+      background: #f7f8fa;
+      color: #59687d;
+      font-size: 12px;
+    }
+    .footer-bar .dot-red {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #d02a2a;
+      display: inline-block;
+    }
+    .assistant {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 20;
+      width: min(370px, calc(100vw - 32px));
+      color: var(--ink);
+    }
+    .panel {
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid rgba(30, 40, 60, .08);
+      border-radius: 22px;
+      background: #fff;
+      box-shadow: 0 18px 55px rgba(37, 44, 72, .18);
+    }
+    .header {
+      padding: 20px 20px 17px;
+      color: #fff;
+      background: linear-gradient(135deg, #5848d8 0%, #6d5de2 48%, #8d7af2 100%);
+    }
+    .header-top { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 16px;
+      background: rgba(255,255,255,.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 6px 14px rgba(82, 70, 180, .28);
+    }
+    .avatar img { width: 42px; height: 42px; object-fit: cover; }
+    .heading { flex: 1; }
+    .heading-title { display: flex; align-items: center; gap: 8px; }
+    .heading strong { display: block; font-size: 15px; letter-spacing: .02em; font-weight: 700; }
     .online { margin-top: 4px; color: #e6e2ff; font-size: 11px; }
     .online:before {
       display: inline-block;
@@ -75,16 +453,115 @@
       border-bottom: 1px solid var(--line);
       color: var(--muted);
       font-size: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #faf9ff 100%);
     }
     .summary strong { color: var(--ink); }
     .tasks { max-height: 345px; overflow-y: auto; padding: 5px 16px 10px; }
     .task {
       display: block;
-      padding: 14px 4px;
+      padding: 14px 10px 14px 8px;
+      border: 1px solid transparent;
+      border-bottom: 1px solid var(--line);
+      color: inherit;
+      transition: background .18s ease, border-color .18s ease;
+    }
+    .task:hover {
+      border-color: rgba(101, 87, 217, .12);
+      background: rgba(101, 87, 217, .03);
+    }
+    .task:last-child { border-bottom: 0; }
+    .task-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .client { font-size: 12px; font-weight: 700; color: #2a74d9; }
+    .badge { padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .urgent { color: #bb3c48; background: #fff0f0; }
+    .soon { color: #9a6500; background: #fff7df; }
+    .normal { color: #536174; background: #f1f4f8; }
+    .low { color: #317a47; background: #eaf7ee; }
+    .task-title { margin: 7px 0 5px; font-size: 13px; font-weight: 600; }
+    .meta, .note { color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .task-details { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 10px; margin-top: 8px; }
+    .note { margin-top: 7px; padding: 8px 9px; border-radius: 9px; background: #f6f5ff; color: #554b9d; }
+    .actions { display: flex; gap: 8px; padding: 12px 16px 16px; }
+    .actions button {
+      flex: 1;
+      padding: 10px;
+      border: 0;
+      border-radius: 10px;
+      background: #f1f0ff;
+      color: var(--purple);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      transition: background .18s ease, transform .18s ease;
+    }
+    .actions button:hover { background: #e7e4ff; transform: translateY(-1px); }
+    .demo { padding: 0 16px 13px; color: #9aa2b2; text-align: center; font-size: 10px; }
+    .robot {
+      position: relative;
+      display: flex;
+      width: 86px;
+      height: 86px;
+      margin-left: auto;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      transition: transform .2s ease;
+    }
+    .robot img {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 7px 10px rgba(32,40,58,.22));
+    }
+    .robot:hover { transform: translateY(-2px) scale(1.03); }
+    [hidden] { display: none !important; }
+    .online { margin-top: 4px; color: #e6e2ff; font-size: 11px; }
+    .online:before {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: #72e2b0;
+      content: "";
+    }
+    .close {
+      border: 0;
+      color: white;
+      background: transparent;
+      cursor: pointer;
+      font-size: 21px;
+      opacity: .85;
+    }
+    .welcome { margin: 17px 0 0; color: #f0eeff; font-size: 13px; line-height: 1.5; }
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #faf9ff 100%);
+    }
+    .summary strong { color: var(--ink); }
+    .tasks { max-height: 345px; overflow-y: auto; padding: 5px 16px 10px; }
+    .task {
+      display: block;
+      padding: 14px 10px 14px 8px;
+      border: 1px solid transparent;
       border-bottom: 1px solid var(--line);
       color: inherit;
       text-decoration: none;
       cursor: pointer;
+      transition: background .18s ease, border-color .18s ease, transform .18s ease;
+    }
+    .task:hover {
+      border-color: rgba(101, 87, 217, .12);
+      background: rgba(101, 87, 217, .03);
+      transform: translateY(-1px);
     }
     .task:last-child { border-bottom: 0; }
     .task:hover .task-title, .task:focus-visible .task-title { color: var(--purple); }
@@ -108,26 +585,31 @@
       cursor: pointer;
       font-size: 11px;
       font-weight: 700;
+      transition: background .18s ease, transform .18s ease;
     }
-    .actions button:hover { background: #e7e4ff; }
+    .actions button:hover { background: #e7e4ff; transform: translateY(-1px); }
     .demo { padding: 0 16px 13px; color: #9aa2b2; text-align: center; font-size: 10px; }
     .robot {
       position: relative;
       display: flex;
-      width: 62px;
-      height: 62px;
+      width: 86px;
+      height: 86px;
       margin-left: auto;
       align-items: center;
       justify-content: center;
-      border: 3px solid #fff;
-      border-radius: 22px;
-      background: linear-gradient(145deg, #796beb, #5748ca);
-      box-shadow: 0 8px 25px rgba(75, 61, 180, .38);
-      color: white;
+      padding: 0;
+      border: 0;
+      background: transparent;
       cursor: pointer;
-      font-size: 30px;
+      transition: transform .2s ease;
     }
-    .robot:hover { transform: translateY(-2px); }
+    .robot img {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 7px 10px rgba(32,40,58,.22));
+    }
+    .robot:hover { transform: translateY(-2px) scale(1.03); }
     .count {
       position: absolute;
       top: -5px;
@@ -144,57 +626,1184 @@
       font-weight: 700;
     }
     [hidden] { display: none !important; }
+    .assistant {
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 48px);
+    }
+    .panel {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .header,
+    .summary,
+    .actions,
+    .demo,
+    .robot { flex-shrink: 0; }
+    .tasks {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none;
+    }
+    .chat-box {
+      flex: 0 0 210px;
+      display: flex;
+      min-height: 170px;
+      flex-direction: column;
+      margin: 0 14px 8px;
+      overflow: hidden;
+      border: 1px solid #e7e5f7;
+      border-radius: 14px;
+      background: #fbfaff;
+    }
+    .chat-heading {
+      flex: 0 0 auto;
+      padding: 9px 11px;
+      border-bottom: 1px solid #eeecf8;
+      color: #5144b7;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .chat-messages {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 9px;
+    }
+    .chat-message {
+      width: fit-content;
+      max-width: 95%;
+      margin-bottom: 7px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+    .chat-message.assistant-message {
+      border: 1px solid #ece9ff;
+      background: #fff;
+      color: #3e3a61;
+    }
+    .chat-message.user-message {
+      margin-left: auto;
+      background: #6557d9;
+      color: #fff;
+    }
+    .chat-form {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 7px;
+      padding: 8px;
+      border-top: 1px solid #eeecf8;
+      background: #fff;
+    }
+    .chat-form input {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 9px;
+      border: 1px solid #d9d6eb;
+      border-radius: 8px;
+      color: var(--ink);
+      font: inherit;
+      font-size: 11px;
+    }
+    .chat-form input:focus { outline: 2px solid rgba(101, 87, 217, .2); border-color: var(--purple); }
+    .chat-form button {
+      padding: 0 11px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--purple);
+      color: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .chat-form button:hover { background: #5144b7; }
+    .robot { flex-shrink: 0; }
+    .crm-shell {
+      background: #e9eef5;
+      color: #172b4d;
+    }
+    .crm-app {
+      max-width: 1440px;
+      background: #f4f7fb;
+      box-shadow: 0 0 48px rgba(23, 43, 77, .08);
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      min-height: 68px;
+      background: rgba(255, 255, 255, .96);
+      border-bottom-color: #dfe5ee;
+      box-shadow: 0 2px 8px rgba(23, 43, 77, .04);
+      backdrop-filter: blur(12px);
+    }
+    .brand { color: #172b4d; }
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      flex-basis: 32px;
+    }
+    .search {
+      max-width: 560px;
+      border-color: #d7dfeb;
+      border-radius: 8px;
+      background: #f7f9fc;
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .search:hover,
+    .search:focus-within {
+      border-color: #78aaf2;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(45, 127, 249, .1);
+    }
+    .top-actions { gap: 12px; }
+    .top-actions span:not(.dot) {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background .18s ease;
+    }
+    .top-actions span:not(.dot):hover { background: #eef4fc; }
+    .subnav {
+      position: sticky;
+      top: 68px;
+      z-index: 3;
+      min-height: 48px;
+      background: #fff;
+      border-bottom-color: #dfe5ee;
+    }
+    .subnav .tab { padding: 14px 2px 11px; }
+    .subnav .tab.active { color: #145dbf; }
+    .page {
+      min-height: calc(100vh - 116px);
+      padding: 30px clamp(18px, 3vw, 42px) 26px;
+      background: #f4f7fb;
+    }
+    .header-row { margin-bottom: 10px; }
+    .header-row h1 {
+      color: #172b4d;
+      font-size: clamp(22px, 2vw, 28px);
+      letter-spacing: -.035em;
+    }
+    .list-toggle { gap: 12px; }
+    .list-chevron {
+      width: 22px;
+      height: 22px;
+      border: 1px solid #d7dfeb;
+      border-radius: 50%;
+      background: #fff;
+      position: relative;
+    }
+    .list-chevron:after {
+      content: "";
+      position: absolute;
+      top: 7px;
+      left: 6px;
+      width: 7px;
+      height: 7px;
+      border-right: 1.5px solid #52647c;
+      border-bottom: 1.5px solid #52647c;
+      transform: rotate(45deg);
+    }
+    .list-menu {
+      min-width: 260px;
+      padding: 8px;
+      border-color: #e0e6ef;
+      border-radius: 10px;
+      box-shadow: 0 12px 30px rgba(23, 43, 77, .16);
+    }
+    .list-option { border-radius: 6px; }
+    .header-row .new-button {
+      position: relative;
+      min-height: 38px;
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: #1769d2;
+      color: #fff;
+      font-family: inherit;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1;
+      box-shadow: 0 4px 10px rgba(23, 105, 210, .18);
+      transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+    .header-row .new-button:hover {
+      background: #0f57b7;
+      box-shadow: 0 6px 14px rgba(23, 105, 210, .24);
+      transform: translateY(-1px);
+    }
+    .header-row .new-button:focus-visible {
+      outline: 3px solid rgba(45, 127, 249, .35);
+      outline-offset: 3px;
+    }
+    .header-row .new-button::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 9px);
+      z-index: 6;
+      width: max-content;
+      padding: 8px 11px;
+      border-radius: 6px;
+      background: #172b4d;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.2;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(3px);
+      transition: opacity .15s ease, transform .15s ease;
+    }
+    .header-row .new-button:hover::after,
+    .header-row .new-button:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .subtext {
+      margin-bottom: 18px;
+      color: #6b7b93;
+      font-size: 12px;
+    }
+    .toolbar {
+      flex-wrap: wrap;
+      padding: 12px;
+      border-color: #e2e8f0;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 3px 10px rgba(23, 43, 77, .035);
+    }
+    .search-mini,
+    .filter-box {
+      min-height: 36px;
+      border-color: #d9e1ec;
+      border-radius: 7px;
+      background: #fff;
+    }
+    .filter-box { display: flex; align-items: center; }
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-color: #e0e6ef;
+      color: #516782;
+      cursor: pointer;
+      transition: color .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .icon-btn:hover {
+      border-color: #b9d2f4;
+      background: #f0f6ff;
+      color: #1769d2;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border-color: #e0e6ef;
+      border-radius: 10px;
+      box-shadow: 0 5px 16px rgba(23, 43, 77, .045);
+    }
+    table { min-width: 1000px; }
+    thead th {
+      padding: 13px 12px;
+      background: #f7f9fc;
+      color: #586b84;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .045em;
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 12px;
+      border-bottom-color: #edf1f6;
+      color: #34465e;
+      white-space: nowrap;
+    }
+    tbody tr { transition: background .15s ease; }
+    tbody tr:hover td { background: #f5f9ff; }
+    .task-name {
+      color: #1769d2;
+      cursor: pointer;
+    }
+    .task-name:hover { text-decoration: underline; }
+    .status-pill {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e9f7ef;
+      color: #267346;
+    }
+    .status-pill.high { background: #fff0e8; color: #bc4b20; }
+    .status-pill.low { background: #edf3ff; color: #3868b2; }
+    .row-actions { position: relative; display: inline-flex; }
+    .edit-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 30px;
+      padding: 0;
+      border-color: #d9e4f2;
+      border-radius: 5px;
+      color: #1769d2;
+      cursor: pointer;
+      font: inherit;
+      font-size: 0;
+    }
+    .edit-link:hover,
+    .edit-link[aria-expanded="true"] { background: #edf5ff; }
+    .edit-link:after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: translateY(-2px) rotate(45deg);
+    }
+    .row-menu {
+      position: absolute;
+      top: calc(100% + 5px);
+      right: 0;
+      z-index: 7;
+      min-width: 132px;
+      padding: 5px;
+      border: 1px solid #e0e6ef;
+      border-radius: 7px;
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(23, 43, 77, .16);
+    }
+    .row-menu button {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #34465e;
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      text-align: left;
+    }
+    .row-menu button:hover { background: #f0f6ff; color: #1769d2; }
+    .row-menu .delete-action { color: #c23934; }
+    .row-menu .delete-action:hover { background: #fff1ef; color: #a61a14; }
+    .task-dialog {
+      width: min(440px, calc(100vw - 32px));
+      padding: 0;
+      border: 1px solid #dce4ef;
+      border-radius: 14px;
+      background: #fff;
+      color: #26364b;
+      box-shadow: 0 24px 70px rgba(17, 35, 60, .3);
+    }
+    .task-dialog::backdrop { background: rgba(20, 35, 58, .42); backdrop-filter: blur(2px); }
+    .dialog-content { padding: 24px; }
+    .dialog-content h2 { margin: 0; color: #172b4d; font-size: 20px; }
+    .edit-dialog-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+    .edit-dialog-contact { margin-top: 14px; }
+    .edit-dialog-status { flex: 0 0 150px; }
+    .edit-dialog-header label { display: block; color: #34465e; font-size: 12px; font-weight: 700; }
+    .edit-dialog-header select {
+      width: 100%;
+      min-height: 36px;
+      margin-top: 6px;
+      padding: 0 9px;
+      border: 1px solid #cbd6e4;
+      border-radius: 7px;
+      background: #fff;
+      color: #26364b;
+      font: inherit;
+      font-size: 13px;
+    }
+    .edit-dialog-header select:focus { outline: 3px solid rgba(45, 127, 249, .18); border-color: #2d7ff9; }
+    .dialog-content p { margin: 10px 0 0; color: #627189; font-size: 14px; line-height: 1.5; }
+    .dialog-content label { display: block; margin-top: 18px; color: #34465e; font-size: 13px; font-weight: 700; }
+    .edit-dialog-header label { margin-top: 0; }
+    .dialog-content textarea {
+      display: block;
+      width: 100%;
+      min-height: 120px;
+      margin-top: 8px;
+      padding: 11px 12px;
+      border: 1px solid #cbd6e4;
+      border-radius: 7px;
+      color: #26364b;
+      font: inherit;
+      font-size: 14px;
+      resize: vertical;
+    }
+    .dialog-content textarea:focus { outline: 3px solid rgba(45, 127, 249, .18); border-color: #2d7ff9; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+    .dialog-actions button {
+      min-height: 36px;
+      padding: 0 15px;
+      border: 1px solid #d4deea;
+      border-radius: 7px;
+      background: #fff;
+      color: #34465e;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .dialog-actions button:hover { background: #f4f7fb; }
+    .dialog-actions .primary-action { border-color: #1769d2; background: #1769d2; color: #fff; }
+    .dialog-actions .primary-action:hover { background: #0f57b7; }
+    .dialog-actions .danger-action { border-color: #c23934; background: #c23934; color: #fff; }
+    .dialog-actions .danger-action:hover { background: #a61a14; }
+    @media (max-width: 480px) {
+      .edit-dialog-header { flex-direction: column; }
+      .edit-dialog-status { flex-basis: auto; width: 100%; }
+    }
+    .footer-bar {
+      position: sticky;
+      bottom: 0;
+      margin: 24px 0 -26px;
+      padding: 13px 20px;
+      border-top-color: #dfe5ee;
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(10px);
+    }
+    @media (max-width: 760px) {
+      .topbar { gap: 10px; padding: 0 12px; }
+      .brand { min-width: auto; font-size: 15px; }
+      .search-wrap { justify-content: flex-start; }
+      .top-actions { gap: 4px; }
+      .subnav { overflow-x: auto; white-space: nowrap; }
+      .toolbar { align-items: stretch; }
+      .search-mini { align-self: flex-end; }
+      .status-group { margin-left: auto; }
+    }
     @media (max-width: 480px) {
       .assistant { right: 16px; bottom: 16px; }
-      .tasks { max-height: 42vh; }
+      .assistant { max-height: calc(100vh - 32px); }
+      .topbar { min-height: 60px; }
+      .brand { gap: 7px; font-size: 0; }
+      .brand-mark { flex: 0 0 32px; }
+      .top-actions { font-size: 15px; }
+      .top-actions span:not(.dot) { width: 28px; height: 28px; }
+      .subnav { top: 60px; }
+      .page { padding: 22px 14px 22px; }
+      .header-row { align-items: flex-start; gap: 12px; }
+      .header-row .new-button { width: 38px; min-width: 38px; height: 38px; }
+      .list-toggle { gap: 7px; }
+      .header-row h1 { font-size: 21px; }
+      .toolbar { gap: 8px; }
+      .filter-box { min-width: 0; flex: 1; padding: 7px 8px; }
+      .status-group { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
+  <div class="crm-shell">
+    <div class="crm-app">
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M9.2 24.5a6.2 6.2 0 0 1-.5-12.4 8.1 8.1 0 0 1 15.4 1.2 5.7 5.7 0 0 1-.4 11.2H9.2Z"/></svg></span> Single Station</div>
+        <div class="search-wrap">
+          <div class="search">Pesquisar...</div>
+        </div>
+        <div class="top-actions" aria-label="Ações do usuário">
+          <span>★</span>
+          <span>✦</span>
+          <span>◌</span>
+          <span class="dot" aria-hidden="true"></span>
+        </div>
+      </header>
+
+      <nav class="subnav" aria-label="Navegação principal">
+        <div class="tab">Console de Atendimento</div>
+        <div class="tab active">Tarefas</div>
+      </nav>
+
+      <main class="page">
+        <div class="header-row">
+          <div class="list-picker">
+            <button class="list-toggle" id="list-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="list-menu">
+              <h1 id="list-title">Minhas Tarefas</h1>
+              <span class="list-chevron" aria-hidden="true"></span>
+            </button>
+            <div class="list-menu" id="list-menu" role="menu" hidden>
+              <button class="list-option" type="button" role="menuitemradio" aria-checked="true" data-view="mine">Minhas Tarefas</button>
+              <button class="list-option" type="button" role="menuitemradio" aria-checked="false" data-view="recent">Tarefas recentes</button>
+              <button class="list-option" type="button" role="menuitemradio" aria-checked="false" data-view="completed">Tarefas finalizadas/canceladas</button>
+            </div>
+          </div>
+          <button class="new-button" type="button" aria-label="Criar nova tarefa" data-tooltip="Criar nova tarefa">+</button>
+        </div>
+
+        <div class="subtext">Lista de tarefas  •  Classificado por Etapas  •  Filtrado por Status  •  Atualizada há 23 minutos</div>
+
+        <div class="toolbar">
+          <div class="filter-box">Todos os status</div>
+          <div class="filter-box">Todas as etapas</div>
+          <div class="status-group">
+            <div class="icon-btn">◌</div>
+            <div class="icon-btn">◫</div>
+            <div class="icon-btn">☰</div>
+            <div class="icon-btn">⚑</div>
+            <div class="icon-btn">☑</div>
+          </div>
+          <label class="search-mini" for="task-search">
+            <input id="task-search" type="search" placeholder="Pesquisar nesta lista..." autocomplete="off">
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Assunto</th>
+                <th>Etapa</th>
+                <th>Contrato</th>
+                <th>Data de criação</th>
+                <th>Vencimento</th>
+                <th>Status</th>
+                <th>Observação</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="task-name">Tarefa com contato: Reforço de reparos e benfeitorias ...</td>
+                <td>Pré Saída IQ</td>
+                <td>773174</td>
+                <td>01/10/2099</td>
+                <td>13/10/2099</td>
+                <td><span class="status-pill normal">em andamento</span></td>
+                <td>Sem sucesso, em ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr>
+                <td class="task-name">Tarefa com contato: Reforço de reparos e benfeitorias ...</td>
+                <td>Pré Saída IQ</td>
+                <td>996334</td>
+                <td>02/10/2099</td>
+                <td>14/10/2099</td>
+                <td><span class="status-pill normal">em andamento</span></td>
+                <td>Cliente pediu reto ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr>
+                <td class="task-name">Retenção - PP</td>
+                <td>Retenção</td>
+                <td>106893</td>
+                <td>03/10/2099</td>
+                <td>30/09/2099</td>
+                <td><span class="status-pill normal">em andamento</span></td>
+                <td>Ligação sem suc ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr>
+                <td class="task-name">Retenção - PP</td>
+                <td>Retenção</td>
+                <td>996334</td>
+                <td>04/10/2099</td>
+                <td>30/09/2099</td>
+                <td><span class="status-pill normal">em andamento</span></td>
+                <td>Aguardando resp ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr>
+                <td class="task-name">Retenção - PP</td>
+                <td>Retenção</td>
+                <td>853514</td>
+                <td>05/10/2099</td>
+                <td>05/10/2099</td>
+                <td><span class="status-pill normal">em andamento</span></td>
+                <td>Nova tentativa ag ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr>
+                <td class="task-name">Retenção - PP</td>
+                <td>Retenção</td>
+                <td>108846</td>
+                <td>06/10/2099</td>
+                <td>05/10/2099</td>
+                <td><span class="status-pill normal">em andamento</span></td>
+                <td>Cliente ainda val ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr>
+                <td class="task-name">Retenção - PP</td>
+                <td>Retenção</td>
+                <td>412144</td>
+                <td>06/10/2099</td>
+                <td>06/10/2099</td>
+                <td><span class="status-pill normal">em andamento</span></td>
+                <td>Deixar mensagem ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr>
+                <td class="task-name">Retenção - PP</td>
+                <td>Retenção</td>
+                <td>119755</td>
+                <td>07/10/2099</td>
+                <td>07/10/2099</td>
+                <td><span class="status-pill normal">em andamento</span></td>
+                <td>Aguardando confi ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr>
+                <td class="task-name">Retenção - PP</td>
+                <td>Retenção</td>
+                <td>113551</td>
+                <td>08/10/2099</td>
+                <td>11/10/2099</td>
+                <td><span class="status-pill normal">em andamento</span></td>
+                <td>Contato realizado ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr>
+                <td class="task-name">Retenção - PP</td>
+                <td>Retenção</td>
+                <td>538496</td>
+                <td>09/10/2099</td>
+                <td>Data inválida</td>
+                <td><span class="status-pill normal">não iniciado</span></td>
+                <td>Tarefa ainda não ...</td>
+                <td><div class="row-actions"><button class="edit-link" type="button" aria-label="Abrir ações da tarefa" aria-haspopup="menu" aria-expanded="false">Editar</button><div class="row-menu" role="menu" hidden><button type="button" role="menuitem">Editar</button><button class="delete-action" type="button" role="menuitem">Excluir</button></div></div></td>
+              </tr>
+              <tr id="tasks-empty" hidden>
+                <td colspan="8" style="text-align: center; color: #616d7e; padding: 24px;">Nenhuma tarefa finalizada ou cancelada nesta lista.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="footer-bar">
+          <span class="dot-red"></span>
+          <span>Omni-Channel</span>
+          <span>•</span>
+          <span>To Do List</span>
+        </div>
+      </main>
+    </div>
+  </div>
+
   <aside class="assistant" aria-label="Assistente de tarefas CRM">
     <section class="panel" id="panel" aria-live="polite">
       <header class="header">
         <div class="header-top">
-          <div class="avatar" aria-hidden="true">🤖</div>
+          <div class="avatar" aria-hidden="true"><img src="assets/baby-yoda-head.png" alt=""></div>
           <div class="heading">
-            <strong>Assistente CRM</strong>
+            <div class="heading-title">
+              <strong>Assistente Yoda</strong>
+            </div>
             <div class="online">Resumo do dia</div>
           </div>
           <button class="close" id="close" aria-label="Minimizar assistente">×</button>
         </div>
-        <p class="welcome">Oi! A lista ficará disponível quando o backend estiver conectado à API do CRM.</p>
+        <p class="welcome">Oi! Aqui estão as tarefas que aparecem na sua lista do Salesforce.</p>
       </header>
-            <div class="summary"><span>Aguardando conexão com a API do CRM</span></div>
-      <div class="tasks">
-        <p class="meta">Nenhuma tarefa foi carregada. Configure a API do CRM no backend para exibir dados reais.</p>
-      </div>
-            <div class="actions">
+      <div class="summary"><span>10 tarefas da lista</span><strong>Atualizado agora</strong></div>
+      <div class="tasks" id="tasks"></div>
+      <section class="chat-box" aria-label="Chat de simulação com o assistente">
+        <div class="chat-heading">Conversa • Simulação</div>
+        <div class="chat-messages" id="chat-messages" role="log" aria-live="polite"></div>
+        <form class="chat-form" id="chat-form">
+          <input id="chat-input" type="text" placeholder="Pergunte sobre uma tarefa..." aria-label="Mensagem para o assistente" autocomplete="off">
+          <button type="submit">Enviar</button>
+        </form>
+      </section>
+      <div class="actions">
         <button id="acknowledge">Entendi</button>
       </div>
-      <div class="demo">Aguardando configuração da API do CRM</div>
+      <div class="demo">Sincronizado com CRM • 1 min atrás</div>
     </section>
-        <button class="robot" id="toggle" aria-label="Abrir assistente">
-      🤖
+    <button class="robot" id="toggle" aria-label="Abrir assistente">
+      <img src="assets/baby-yoda-head.png" alt="">
     </button>
   </aside>
+
+  <dialog class="task-dialog" id="edit-dialog" aria-labelledby="edit-dialog-title">
+    <form class="dialog-content" id="edit-form">
+      <div class="edit-dialog-header">
+        <div>
+          <h2 id="edit-dialog-title">Editar observação</h2>
+          <div class="edit-dialog-contact">
+            <label for="contact-select">Conseguiu contato?</label>
+            <select id="contact-select" name="contact">
+              <option value="yes">Sim</option>
+              <option value="no">Não</option>
+            </select>
+          </div>
+        </div>
+        <div class="edit-dialog-status">
+          <label for="completion-select">Finalizada?</label>
+          <select id="completion-select" name="completion">
+            <option value="yes">Sim</option>
+            <option value="no">Não</option>
+            <option value="ongoing">Em andamento</option>
+          </select>
+        </div>
+      </div>
+      <p id="edit-task-title"></p>
+      <label for="observation-input">Observação</label>
+      <textarea id="observation-input" name="observation"></textarea>
+      <div class="dialog-actions">
+        <button type="button" data-dialog-close>Cancelar</button>
+        <button class="primary-action" type="submit">Salvar alteração</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="task-dialog" id="delete-dialog" aria-labelledby="delete-dialog-title">
+    <div class="dialog-content">
+      <h2 id="delete-dialog-title">Excluir tarefa?</h2>
+      <p id="delete-task-title"></p>
+      <div class="dialog-actions">
+        <button type="button" data-dialog-close>Cancelar</button>
+        <button class="danger-action" id="confirm-delete" type="button">Excluir tarefa</button>
+      </div>
+    </div>
+  </dialog>
+
   <script>
-    var panel = document.getElementById("panel");
-    var taskLinks = document.querySelectorAll(".task");
-    for (var i = 0; i < taskLinks.length; i++) {
-      taskLinks[i].addEventListener("click", function (event) {
-        event.preventDefault();
-        var recordUrl = this.getAttribute("data-record-url");
-        if (recordUrl && /^https?:\/\//i.test(recordUrl)) {
-          window.location.href = recordUrl;
-        } else {
-          window.alert("O link do registro ainda não foi configurado. Conecte o CRM para abrir o contrato relacionado.");
-        }
+    const tasks = [
+      {
+        title: 'Tarefa com contato: Reforço de reparos e benfeitorias ...',
+        stage: 'Pré Saída IQ',
+        contract: '773174',
+        due: '13/10/2099',
+        status: 'Em andamento',
+        priority: 'Normal',
+        priorityClass: 'normal',
+        created: '01/10/2099',
+        response: 'Nenhum',
+        related: '01430926',
+        note: 'Sem sucesso, em ...'
+      },
+      {
+        title: 'Tarefa com contato: Reforço de reparos e benfeitorias ...',
+        stage: 'Pré Saída IQ',
+        contract: '996334',
+        due: '14/10/2099',
+        status: 'Em andamento',
+        priority: 'Normal',
+        priorityClass: 'normal',
+        created: '02/10/2099',
+        response: 'Nenhum',
+        related: '01430927',
+        note: 'Cliente pediu reto ...'
+      },
+      {
+        title: 'Retenção - PP',
+        stage: 'Retenção',
+        contract: '106893',
+        due: '30/09/2099',
+        status: 'Em andamento',
+        priority: 'Alta',
+        priorityClass: 'urgent',
+        created: '03/10/2099',
+        response: 'Retornar contato',
+        related: '01430928',
+        note: 'Ligação sem suc ...'
+      },
+      {
+        title: 'Retenção - PP',
+        stage: 'Retenção',
+        contract: '996334',
+        due: '30/09/2099',
+        status: 'Em andamento',
+        priority: 'Normal',
+        priorityClass: 'normal',
+        created: '04/10/2099',
+        response: 'Nenhum',
+        related: '01430929',
+        note: 'Aguardando resp ...'
+      },
+      {
+        title: 'Retenção - PP',
+        stage: 'Retenção',
+        contract: '853514',
+        due: '05/10/2099',
+        status: 'Em andamento',
+        priority: 'Normal',
+        priorityClass: 'normal',
+        created: '05/10/2099',
+        response: 'Retornar contato',
+        related: '01430930',
+        note: 'Nova tentativa ag ...'
+      },
+      {
+        title: 'Retenção - PP',
+        stage: 'Retenção',
+        contract: '108846',
+        due: '05/10/2099',
+        status: 'Em andamento',
+        priority: 'Baixa',
+        priorityClass: 'low',
+        created: '06/10/2099',
+        response: 'Nenhum',
+        related: '01430931',
+        note: 'Cliente ainda val ...'
+      },
+      {
+        title: 'Retenção - PP',
+        stage: 'Retenção',
+        contract: '412144',
+        due: '06/10/2099',
+        status: 'Em andamento',
+        priority: 'Normal',
+        priorityClass: 'normal',
+        created: '06/10/2099',
+        response: 'Retornar contato',
+        related: '01430932',
+        note: 'Deixar mensagem ...'
+      },
+      {
+        title: 'Retenção - PP',
+        stage: 'Retenção',
+        contract: '119755',
+        due: '07/10/2099',
+        status: 'Em andamento',
+        priority: 'Normal',
+        priorityClass: 'normal',
+        created: '07/10/2099',
+        response: 'Nenhum',
+        related: '01430933',
+        note: 'Aguardando confi ...'
+      },
+      {
+        title: 'Retenção - PP',
+        stage: 'Retenção',
+        contract: '113551',
+        due: '11/10/2099',
+        status: 'Em andamento',
+        priority: 'Alta',
+        priorityClass: 'urgent',
+        created: '08/10/2099',
+        response: 'Retornar contato',
+        related: '01430934',
+        note: 'Contato realizado ...'
+      },
+      {
+        title: 'Retenção - PP',
+        stage: 'Retenção',
+        contract: '538496',
+        due: 'Data inválida',
+        status: 'Não iniciado',
+        priority: 'Normal',
+        priorityClass: 'normal',
+        created: '09/10/2099',
+        response: 'Nenhum',
+        related: '01430935',
+        note: 'Tarefa ainda não ...'
+      }
+    ];
+
+    const taskList = document.getElementById('tasks');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const demoReferenceDate = Date.UTC(2099, 9, 10);
+
+    function getTaskDueDate(task) {
+      var parts = task.due.split("/");
+      if (parts.length !== 3 || parts.some(function(part) { return !/^\d+$/.test(part); })) return null;
+      var day = Number(parts[0]);
+      var month = Number(parts[1]);
+      var year = Number(parts[2]);
+      var dueDate = new Date(Date.UTC(year, month - 1, day));
+      if (dueDate.getUTCDate() !== day || dueDate.getUTCMonth() !== month - 1 || dueDate.getUTCFullYear() !== year) {
+        return null;
+      }
+      return dueDate.getTime();
+    }
+
+    function getNextDueTask() {
+      return tasks
+        .filter(function(task) {
+          var dueDate = getTaskDueDate(task);
+          return !isCompletedStatus(task.status) && dueDate !== null && dueDate >= demoReferenceDate;
+        })
+        .sort(function(first, second) {
+          return getTaskDueDate(first) - getTaskDueDate(second);
+        })[0] || null;
+    }
+
+    function getDueTaskMessage() {
+      var task = getNextDueTask();
+      if (!task) {
+        return "Não encontrei tarefas ativas com vencimento futuro na simulação.";
+      }
+      var nextStep = task.response && task.response !== "Nenhum"
+        ? task.response
+        : "revise a observação e realize o próximo contato necessário";
+      return "A próxima tarefa a vencer é \"" + task.title + "\" (contrato " + task.contract + "), em " + task.due + ".\nO que fazer: " + nextStep + ", registrar o resultado na observação e atualizar o status da tarefa quando concluir.";
+    }
+
+    function addChatMessage(message, sender) {
+      var messageElement = document.createElement("div");
+      messageElement.className = "chat-message " + (sender === "user" ? "user-message" : "assistant-message");
+      messageElement.textContent = message;
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    addChatMessage("Olá! Simulação com tarefas de demonstração (data-base: 10/10/2099). " + getDueTaskMessage(), "assistant");
+    document.getElementById("chat-form").addEventListener("submit", function(event) {
+      event.preventDefault();
+      var message = chatInput.value.trim();
+      if (!message) return;
+      addChatMessage(message, "user");
+      addChatMessage(getDueTaskMessage(), "assistant");
+      chatInput.value = "";
+      chatInput.focus();
+    });
+
+    function isCompletedStatus(status) {
+      var normalizedStatus = status.trim().toLowerCase();
+      return normalizedStatus.indexOf("finaliz") === 0 || normalizedStatus.indexOf("cancel") === 0;
+    }
+
+    function getActiveTaskCount() {
+      return tasks.filter(function(task) {
+        return !isCompletedStatus(task.status);
+      }).length;
+    }
+
+    function renderAssistantTasks() {
+      var activeTasks = tasks.filter(function(task) {
+        return !isCompletedStatus(task.status);
+      });
+      taskList.innerHTML = activeTasks.map(function(task) {
+        return `
+          <article class="task">
+            <div class="task-top">
+              <span class="client"></span>
+              <span class="badge ${task.priorityClass}">${task.priority}</span>
+            </div>
+            <div class="task-details meta">
+              <span>Etapa: ${task.stage}</span>
+              <span>Contrato: ${task.contract}</span>
+              <span>Data de criação: ${task.created}</span>
+              <span>Vencimento: ${task.due}</span>
+              <span>Status: ${task.status}</span>
+              <span class="contact-status"></span>
+              <span>Resposta: ${task.response}</span>
+              <span>Relacionado: ${task.related}</span>
+            </div>
+            <div class="note"></div>
+          </article>
+        `;
+      }).join('');
+
+      taskList.querySelectorAll('.task').forEach(function(card, index) {
+        card.querySelector('.client').textContent = activeTasks[index].title;
+        card.querySelector('.note').textContent = activeTasks[index].note;
+        card.querySelector('.contact-status').textContent =
+          'Conseguiu contato: ' + (activeTasks[index].contacted || 'Não');
       });
     }
+    renderAssistantTasks();
+    document.querySelector(".summary span").textContent = getActiveTaskCount() + " tarefas da lista";
+
+    var panel = document.getElementById("panel");
     document.getElementById("close").addEventListener("click", function () { panel.hidden = true; });
     document.getElementById("toggle").addEventListener("click", function () { panel.hidden = !panel.hidden; });
     document.getElementById("acknowledge").addEventListener("click", function () { panel.hidden = true; });
-    
+
+    var listToggle = document.getElementById("list-toggle");
+    var listMenu = document.getElementById("list-menu");
+    var listOptions = document.querySelectorAll(".list-option");
+    var listTitle = document.getElementById("list-title");
+    var listRows = document.querySelectorAll(".table-wrap tbody tr:not(#tasks-empty)");
+    var emptyTasks = document.getElementById("tasks-empty");
+    var taskSearch = document.getElementById("task-search");
+    var editDialog = document.getElementById("edit-dialog");
+    var deleteDialog = document.getElementById("delete-dialog");
+    var editForm = document.getElementById("edit-form");
+    var observationInput = document.getElementById("observation-input");
+    var contactSelect = document.getElementById("contact-select");
+    var completionSelect = document.getElementById("completion-select");
+    var currentTaskRow = null;
+
+    listRows.forEach(function (row, index) {
+      row.dataset.taskIndex = index;
+    });
+
+    function updateTaskListVisibility(selectedView) {
+      var showCompleted = selectedView === "completed";
+      var query = taskSearch.value.trim().toLocaleLowerCase();
+      var visibleCount = 0;
+
+      for (var rowIndex = 0; rowIndex < listRows.length; rowIndex++) {
+        var status = listRows[rowIndex].cells[5].innerText.trim().toLowerCase();
+        var isCompleted = isCompletedStatus(status);
+        var taskName = listRows[rowIndex].cells[0].innerText.toLocaleLowerCase();
+        var contractNumber = listRows[rowIndex].cells[2].innerText.trim().toLocaleLowerCase();
+        var matchesQuery = !query || taskName.includes(query) || contractNumber.includes(query);
+        var matchesView = showCompleted ? isCompleted : !isCompleted;
+        listRows[rowIndex].hidden = !matchesView || !matchesQuery;
+        if (!listRows[rowIndex].hidden) visibleCount++;
+      }
+
+      emptyTasks.hidden = visibleCount > 0;
+      emptyTasks.cells[0].innerText = query
+        ? "Nenhuma tarefa encontrada com esse nome."
+        : (showCompleted
+          ? "Nenhuma tarefa finalizada ou cancelada nesta lista."
+          : "Nenhuma tarefa nesta lista.");
+    }
+
+    taskSearch.addEventListener("input", function () {
+      var selectedOption = document.querySelector('.list-option[aria-checked="true"]');
+      updateTaskListVisibility(selectedOption.getAttribute("data-view"));
+    });
+
+    listToggle.addEventListener("click", function () {
+      var isExpanded = listToggle.getAttribute("aria-expanded") === "true";
+      listToggle.setAttribute("aria-expanded", String(!isExpanded));
+      listMenu.hidden = isExpanded;
+    });
+
+    for (var optionIndex = 0; optionIndex < listOptions.length; optionIndex++) {
+      listOptions[optionIndex].addEventListener("click", function () {
+        var selectedView = this.getAttribute("data-view");
+        updateTaskListVisibility(selectedView);
+        listTitle.innerText = this.innerText;
+        for (var selectedIndex = 0; selectedIndex < listOptions.length; selectedIndex++) {
+          listOptions[selectedIndex].setAttribute("aria-checked", String(listOptions[selectedIndex] === this));
+        }
+        listMenu.hidden = true;
+        listToggle.setAttribute("aria-expanded", "false");
+        listToggle.focus();
+      });
+    }
+
+    document.addEventListener("click", function (event) {
+      if (!event.target.closest(".list-picker")) {
+        listMenu.hidden = true;
+        listToggle.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && !listMenu.hidden) {
+        listMenu.hidden = true;
+        listToggle.setAttribute("aria-expanded", "false");
+        listToggle.focus();
+      }
+    });
+
+    document.addEventListener("click", function (event) {
+      var menuToggle = event.target.closest(".edit-link");
+      if (menuToggle) {
+        var rowActions = menuToggle.closest(".row-actions");
+        var rowMenu = rowActions.querySelector(".row-menu");
+        var shouldOpen = rowMenu.hidden;
+
+        document.querySelectorAll(".row-menu").forEach(function (menu) {
+          menu.hidden = true;
+          menu.closest(".row-actions").querySelector(".edit-link").setAttribute("aria-expanded", "false");
+        });
+
+        rowMenu.hidden = !shouldOpen;
+        menuToggle.setAttribute("aria-expanded", String(shouldOpen));
+        return;
+      }
+
+      var menuItem = event.target.closest(".row-menu button");
+      if (menuItem) {
+        var parentMenu = menuItem.closest(".row-menu");
+        currentTaskRow = menuItem.closest("tr");
+        parentMenu.hidden = true;
+        parentMenu.closest(".row-actions").querySelector(".edit-link").setAttribute("aria-expanded", "false");
+
+        if (menuItem.classList.contains("delete-action")) {
+          document.getElementById("delete-task-title").textContent =
+            "A tarefa \"" + currentTaskRow.cells[0].innerText.trim() + "\" será removida da lista.";
+          deleteDialog.showModal();
+        } else {
+          var task = tasks[Number(currentTaskRow.dataset.taskIndex)];
+          document.getElementById("edit-task-title").textContent = task.title;
+          observationInput.value = currentTaskRow.cells[6].innerText.trim();
+          contactSelect.value = task.contacted === "Sim" ? "yes" : "no";
+          completionSelect.value = isCompletedStatus(task.status)
+            ? "yes"
+            : (task.status.toLowerCase() === "não finalizada" ? "no" : "ongoing");
+          editDialog.showModal();
+          observationInput.focus();
+        }
+        return;
+      }
+
+      if (!event.target.closest(".row-actions")) {
+        document.querySelectorAll(".row-menu").forEach(function (menu) {
+          menu.hidden = true;
+          menu.closest(".row-actions").querySelector(".edit-link").setAttribute("aria-expanded", "false");
+        });
+      }
+    });
+
+    document.querySelectorAll("[data-dialog-close]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        button.closest("dialog").close();
+      });
+    });
+
+    editForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (!currentTaskRow) return;
+
+      var taskIndex = Number(currentTaskRow.dataset.taskIndex);
+      var observation = observationInput.value.trim();
+      var status = completionSelect.value === "yes"
+        ? "Finalizada"
+        : (completionSelect.value === "no" ? "Não finalizada" : "Em andamento");
+      var statusPill = currentTaskRow.cells[5].querySelector(".status-pill");
+      currentTaskRow.cells[6].textContent = observation || "—";
+      tasks[taskIndex].note = observation || "—";
+      tasks[taskIndex].contacted = contactSelect.value === "yes" ? "Sim" : "Não";
+      tasks[taskIndex].status = status;
+      statusPill.textContent = status.toLowerCase();
+      renderAssistantTasks();
+      document.querySelector(".summary span").textContent = getActiveTaskCount() + " tarefas da lista";
+      var selectedOption = document.querySelector('.list-option[aria-checked="true"]');
+      updateTaskListVisibility(selectedOption.getAttribute("data-view"));
+      editDialog.close();
+      currentTaskRow = null;
+    });
+
+    document.getElementById("confirm-delete").addEventListener("click", function () {
+      if (!currentTaskRow) return;
+
+      var taskIndex = Number(currentTaskRow.dataset.taskIndex);
+      currentTaskRow.remove();
+      tasks.splice(taskIndex, 1);
+      listRows = document.querySelectorAll(".table-wrap tbody tr:not(#tasks-empty)");
+      listRows.forEach(function (row, index) {
+        row.dataset.taskIndex = index;
+      });
+      renderAssistantTasks();
+      document.querySelector(".summary span").textContent = getActiveTaskCount() + " tarefas da lista";
+
+      var selectedOption = document.querySelector('.list-option[aria-checked="true"]');
+      updateTaskListVisibility(selectedOption.getAttribute("data-view"));
+      deleteDialog.close();
+      currentTaskRow = null;
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        var openRowMenu = document.querySelector(".row-menu:not([hidden])");
+        if (openRowMenu) {
+          openRowMenu.hidden = true;
+          openRowMenu.closest(".row-actions").querySelector(".edit-link").focus();
+          openRowMenu.closest(".row-actions").querySelector(".edit-link").setAttribute("aria-expanded", "false");
+        }
+      }
+    });
   </script>
 </body>
 </html>
