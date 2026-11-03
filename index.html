@@ -3,198 +3,587 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Assistente CRM</title>
+  <title>Tarefas | Single Station</title>
   <style>
     :root {
       color-scheme: light;
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --ink: #20283a;
-      --muted: #758096;
-      --purple: #6557d9;
-      --line: #edf0f5;
+      --ink: #183153;
+      --muted: #64758b;
+      --blue: #1677d2;
+      --line: #d9e2ee;
+      --page: #f3f6fa;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: #f5f6fa; }
+    body { min-height: 100vh; margin: 0; background: var(--page); color: var(--ink); }
+    button, input, select { font: inherit; }
+
+    .topbar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 20px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .cloud {
+      position: relative;
+      width: 23px;
+      height: 13px;
+      margin-right: 1px;
+      border-radius: 9px;
+      background: #1685e8;
+    }
+    .cloud::before, .cloud::after {
+      position: absolute;
+      bottom: 5px;
+      border-radius: 50%;
+      background: #1685e8;
+      content: "";
+    }
+    .cloud::before { left: 5px; width: 12px; height: 12px; }
+    .cloud::after { right: 3px; width: 9px; height: 9px; }
+    .brand { font-size: 18px; font-weight: 700; white-space: nowrap; }
+    .global-search {
+      width: min(560px, 48vw);
+      height: 36px;
+      margin: 0 auto;
+      padding: 0 12px;
+      border: 1px solid #d4dfed;
+      border-radius: 8px;
+      background: #f7f9fc;
+      color: var(--muted);
+      text-align: left;
+      font-size: 13px;
+    }
+    .star { color: #627187; font-size: 19px; }
+    .tabs {
+      display: flex;
+      align-items: stretch;
+      height: 48px;
+      padding-left: 22px;
+      gap: 24px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .tabs a {
+      display: flex;
+      align-items: center;
+      padding: 0 2px;
+      color: #29425f;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .tabs a.active { border-bottom: 3px solid #1685e8; color: #075eb5; }
+    main { max-width: 1500px; margin: 0 auto; padding: 34px 42px 72px; }
+    .title-row { display: flex; align-items: center; gap: 12px; }
+    h1 { margin: 0; font-size: clamp(25px, 3vw, 30px); letter-spacing: -.7px; }
+    .dropdown {
+      width: 25px;
+      height: 25px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: #fff;
+      color: #526b87;
+      cursor: pointer;
+    }
+    .subtitle { margin: 13px 0 18px; color: var(--muted); font-size: 12px; }
+    .toolbar {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px 10px 0 0;
+      background: #fff;
+    }
+    .filter, .list-search {
+      height: 38px;
+      border: 1px solid #d5e0ed;
+      border-radius: 7px;
+      background: #fff;
+      color: #40566f;
+      font-size: 12px;
+    }
+    .filter { min-width: 120px; padding: 0 12px; }
+    .icon-button {
+      width: 35px;
+      height: 35px;
+      border: 1px solid #dce5ef;
+      border-radius: 50%;
+      background: #fff;
+      color: #526b87;
+      cursor: pointer;
+    }
+    .list-search {
+      width: min(250px, 28vw);
+      margin-left: auto;
+      padding: 0 12px;
+    }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-top: 0; background: #fff; }
+    table { width: 100%; min-width: 900px; border-collapse: collapse; text-align: left; }
+    thead { background: #f7f9fc; }
+    th {
+      height: 42px;
+      padding: 0 13px;
+      border-bottom: 1px solid var(--line);
+      color: #53677e;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .25px;
+      white-space: nowrap;
+    }
+    td {
+      height: 55px;
+      padding: 0 13px;
+      border-bottom: 1px solid #e6ecf3;
+      color: #304966;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    tbody tr:hover { background: #f5f9ff; }
+    .subject { max-width: 380px; overflow: hidden; color: #0866c5; text-overflow: ellipsis; }
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 15px;
+      background: #edf1f6;
+      color: #38516d;
+      font-size: 11px;
+    }
+    .priority { color: #a26410; }
+    /* Botão de cada linha que abre o menu de ações da tarefa. */
+    .row-action {
+      display: inline-grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border: 1px solid #d5e0ed;
+      border-radius: 6px;
+      background: #fff;
+      color: #1677d2;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .row-action:hover { background: #f5f9ff; border-color: #9bbce0; }
+    /* Mantém o menu posicionado em relação ao botão de ações da linha. */
+    .action-menu-container { position: relative; display: inline-block; }
+    /* Menu suspenso com as opções de editar e excluir a tarefa. */
+    .action-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      z-index: 5;
+      min-width: 135px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(30, 50, 75, .15);
+    }
+    .action-menu button {
+      display: block;
+      width: 100%;
+      padding: 9px 10px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .action-menu button:hover { background: #f1f6fc; }
+    .action-menu .delete-action { color: #c03939; }
+    /* Fundo escurecido que cobre a página enquanto a edição está aberta. */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(18, 34, 54, .48);
+    }
+    /* Caixa central com o formulário de edição da tarefa. */
+    .edit-modal {
+      width: min(440px, 100%);
+      padding: 24px;
+      border: 1px solid #d9e2ee;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 18px 50px rgba(20, 35, 55, .25);
+    }
+    .edit-modal h2 { margin: 0 0 20px; font-size: 21px; }
+    .edit-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 20px;
+    }
+    .edit-field { min-width: 0; }
+    .edit-field label, .observation-field label {
+      display: block;
+      margin-bottom: 6px;
+      color: #344a63;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .edit-field select {
+      width: 100%;
+      height: 38px;
+      padding: 0 10px;
+      border: 1px solid #cbd8e8;
+      border-radius: 7px;
+      background: #fff;
+      color: #40566f;
+      font-size: 13px;
+    }
+    .modal-subject {
+      overflow: hidden;
+      margin: 14px 0 18px;
+      color: #64758b;
+      font-size: 13px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .observation-field textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 10px;
+      border: 1px solid #1677d2;
+      border-radius: 8px;
+      outline: 3px solid rgba(22, 119, 210, .12);
+      color: #304966;
+      font: inherit;
+      font-size: 13px;
+      resize: vertical;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .modal-actions button {
+      min-height: 38px;
+      padding: 0 15px;
+      border: 1px solid #d3deeb;
+      border-radius: 8px;
+      background: #f7f9fc;
+      color: #304966;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .modal-actions .save-button { border-color: #1769d2; background: #1769d2; color: #fff; }
+    .table-footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 40px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-top: 0;
+      border-radius: 0 0 8px 8px;
+      background: #fff;
+      color: #62758d;
+      font-size: 11px;
+    }
+    .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #d84242; }
+    .demo-note { margin: 12px 2px 0; color: #8491a2; font-size: 11px; }
+
     .assistant {
       position: fixed;
-      right: 24px;
-      bottom: 24px;
+      right: 28px;
+      bottom: 20px;
       z-index: 10;
-      width: min(370px, calc(100vw - 32px));
-      color: var(--ink);
+      width: min(350px, calc(100vw - 32px));
+      color: #20283a;
     }
     .panel {
       overflow: hidden;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
       border: 1px solid rgba(30, 40, 60, .08);
-      border-radius: 20px;
+      border-radius: 18px;
       background: #fff;
-      box-shadow: 0 18px 55px rgba(37, 44, 72, .2);
+      box-shadow: 0 18px 55px rgba(37, 44, 72, .18);
     }
-    .header {
-      padding: 20px 20px 17px;
+    .assistant-header {
+      padding: 15px 17px;
       color: #fff;
-      background: linear-gradient(135deg, #6557d9, #8672ed);
+      background: linear-gradient(135deg, #5848d8, #8d7af2);
     }
-    .header-top { display: flex; align-items: center; gap: 12px; }
+    .assistant-headrow { display: flex; align-items: center; gap: 10px; }
     .avatar {
       display: grid;
-      width: 42px;
-      height: 42px;
+      flex: 0 0 38px;
+      width: 38px;
+      height: 38px;
       place-items: center;
+      overflow: hidden;
       border: 1px solid rgba(255,255,255,.35);
-      border-radius: 15px;
-      background: rgba(255,255,255,.17);
-      font-size: 23px;
+      border-radius: 13px;
+      background: rgba(255,255,255,.14);
     }
-    .heading { flex: 1; }
-    .heading strong { display: block; font-size: 15px; }
-    .online { margin-top: 4px; color: #e6e2ff; font-size: 11px; }
-    .online:before {
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      margin-right: 6px;
-      border-radius: 50%;
-      background: #72e2b0;
-      content: "";
+    .avatar img { width: 25px; height: 25px; object-fit: contain; }
+    .heading { flex: 1; min-width: 0; }
+    .heading strong { display: block; font-size: 14px; }
+    .online { margin-top: 4px; color: #e6e2ff; font-size: 10px; }
+    .online::before {
+      display: inline-block; width: 7px; height: 7px; margin-right: 6px;
+      border-radius: 50%; background: #72e2b0; content: "";
     }
     .close {
-      border: 0;
-      color: white;
-      background: transparent;
-      cursor: pointer;
-      font-size: 21px;
-      opacity: .85;
+      padding: 0 3px; border: 0; background: transparent; color: #fff;
+      cursor: pointer; font-size: 21px; opacity: .85;
     }
-    .welcome { margin: 17px 0 0; color: #f0eeff; font-size: 13px; line-height: 1.5; }
-    .summary {
-      display: flex;
-      justify-content: space-between;
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .summary strong { color: var(--ink); }
-    .tasks { max-height: 345px; overflow-y: auto; padding: 5px 16px 10px; }
-    .task {
-      display: block;
-      padding: 14px 4px;
-      border-bottom: 1px solid var(--line);
-      color: inherit;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .task:last-child { border-bottom: 0; }
-    .task:hover .task-title, .task:focus-visible .task-title { color: var(--purple); }
-    .task:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; border-radius: 8px; }
-    .task-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .client { font-size: 12px; font-weight: 700; }
-    .badge { padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; }
-    .urgent { color: #bb3c48; background: #fff0f0; }
-    .soon { color: #9a6500; background: #fff7df; }
-    .task-title { margin: 7px 0 5px; font-size: 13px; font-weight: 600; }
-    .meta, .note { color: var(--muted); font-size: 11px; line-height: 1.5; }
-    .note { margin-top: 7px; padding: 8px 9px; border-radius: 9px; background: #f6f5ff; color: #554b9d; }
-    .actions { display: flex; gap: 8px; padding: 12px 16px 16px; }
+    .welcome { margin: 11px 0 0; color: #f0eeff; font-size: 12px; line-height: 1.45; }
+    .summary { padding: 11px 17px; border-bottom: 1px solid #edf0f5; color: var(--muted); font-size: 11px; }
+    .empty-state { padding: 13px 17px; color: #758096; font-size: 11px; line-height: 1.45; }
+    .actions { padding: 0 14px 13px; }
     .actions button {
-      flex: 1;
-      padding: 10px;
-      border: 0;
-      border-radius: 10px;
-      background: #f1f0ff;
-      color: var(--purple);
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 700;
+      width: 100%; padding: 9px; border: 0; border-radius: 9px;
+      background: #f1f0ff; color: #6557d9; cursor: pointer; font-size: 11px; font-weight: 700;
     }
-    .actions button:hover { background: #e7e4ff; }
-    .demo { padding: 0 16px 13px; color: #9aa2b2; text-align: center; font-size: 10px; }
     .robot {
-      position: relative;
-      display: flex;
-      width: 62px;
-      height: 62px;
-      margin-left: auto;
-      align-items: center;
-      justify-content: center;
-      border: 3px solid #fff;
-      border-radius: 22px;
-      background: linear-gradient(145deg, #796beb, #5748ca);
-      box-shadow: 0 8px 25px rgba(75, 61, 180, .38);
-      color: white;
-      cursor: pointer;
-      font-size: 30px;
+      display: flex; width: 66px; height: 66px; margin-left: auto; align-items: center;
+      justify-content: center; padding: 0; border: 0; background: transparent; cursor: pointer;
+      transition: transform .2s ease;
     }
-    .robot:hover { transform: translateY(-2px); }
-    .count {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      display: grid;
-      width: 21px;
-      height: 21px;
-      place-items: center;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      background: #f04f68;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-    }
+    .robot img { width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 7px 10px rgba(32,40,58,.22)); }
+    .robot:hover { transform: translateY(-2px) scale(1.03); }
     [hidden] { display: none !important; }
-    @media (max-width: 480px) {
-      .assistant { right: 16px; bottom: 16px; }
-      .tasks { max-height: 42vh; }
+    @media (max-width: 700px) {
+      main { padding: 26px 16px 100px; }
+      .topbar { padding: 0 14px; }
+      .brand { font-size: 16px; }
+      .global-search { width: auto; flex: 1; margin-left: 8px; }
+      .tabs { padding-left: 16px; }
+      .toolbar { flex-wrap: wrap; }
+      .filter { min-width: 0; flex: 1; }
+      .icon-button { width: 32px; height: 32px; }
+      .list-search { width: 100%; margin-left: 0; }
+      .assistant { right: 12px; bottom: 8px; width: min(330px, calc(100vw - 24px)); }
     }
   </style>
 </head>
 <body>
-  <aside class="assistant" aria-label="Assistente de tarefas CRM">
-    <section class="panel" id="panel" aria-live="polite">
-      <header class="header">
-        <div class="header-top">
-          <div class="avatar" aria-hidden="true">🤖</div>
-          <div class="heading">
-            <strong>Assistente CRM</strong>
-            <div class="online">Resumo do dia</div>
-          </div>
-          <button class="close" id="close" aria-label="Minimizar assistente">×</button>
-        </div>
-        <p class="welcome">Oi! A lista ficará disponível quando o backend estiver conectado à API do CRM.</p>
-      </header>
-            <div class="summary"><span>Aguardando conexão com a API do CRM</span></div>
-      <div class="tasks">
-        <p class="meta">Nenhuma tarefa foi carregada. Configure a API do CRM no backend para exibir dados reais.</p>
+  <header class="topbar">
+    <span class="cloud" aria-hidden="true"></span>
+    <span class="brand">Single Station</span>
+    <button class="global-search" type="button" aria-label="Pesquisar">⌕ &nbsp; Pesquisar...</button>
+    <span class="star" aria-label="Favoritos">★</span>
+  </header>
+  <nav class="tabs" aria-label="Navegação principal">
+    <a href="#console">Console de Atendimento</a>
+    <a class="active" href="#tarefas">Tarefas</a>
+  </nav>
+
+  <main id="tarefas">
+    <div class="title-row">
+      <h1>Minhas Tarefas</h1>
+      <button class="dropdown" type="button" aria-label="Opções da lista">⌄</button>
+    </div>
+    <p class="subtitle">Lista de tarefas • Classificado por Etapas • Filtrado por Status • Atualizada agora</p>
+
+    <section aria-label="Lista de tarefas">
+      <div class="toolbar">
+        <select class="filter" aria-label="Filtrar por status">
+          <option>Todos os status</option>
+          <option>Em andamento</option>
+          <option>Concluída</option>
+        </select>
+        <select class="filter" aria-label="Filtrar por etapa">
+          <option>Todas as etapas</option>
+          <option>Pré Saída IQ</option>
+          <option>Retenção</option>
+        </select>
+        <button class="icon-button" type="button" aria-label="Atualizar">↻</button>
+        <button class="icon-button" type="button" aria-label="Exibição em colunas">◫</button>
+        <button class="icon-button" type="button" aria-label="Exibição em lista">☰</button>
+        <button class="icon-button" type="button" aria-label="Marcar favorito">⚑</button>
+        <button class="icon-button" type="button" aria-label="Selecionar">☑</button>
+        <input class="list-search" type="search" placeholder="⌕  Pesquisar nesta lista..." aria-label="Pesquisar nesta lista">
       </div>
-            <div class="actions">
-        <button id="acknowledge">Entendi</button>
+      <!-- Tabela com as tarefas e suas informações. -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ASSUNTO</th><th>ETAPA</th><th>CONTRATO</th><th>DATA DE CRIAÇÃO</th>
+              <th>VENCIMENTO</th><th>STATUS</th><th>OBSERVAÇÃO</th><th>AÇÕES</th>
+            </tr>
+          </thead>
+          <!-- Cada linha é uma tarefa demonstrativa, com um menu próprio de ações. -->
+          <tbody>
+            <tr>
+              <td class="subject">Tarefa com contato: Reforço de reparos e benfeitorias ...</td><td>Pré Saída IQ</td><td>77314</td><td>01/10/2026</td><td>13/10/2026</td><td><span class="status">Em andamento</span></td><td>Sem sucesso, em nova tentativa</td><td><div class="action-menu-container"><button class="row-action" type="button" aria-label="Ações da tarefa" aria-expanded="false">⌄</button><div class="action-menu" hidden><button type="button" data-action="edit">Editar</button><button class="delete-action" type="button" data-action="delete">Excluir</button></div></div></td>
+            </tr>
+            <tr>
+              <td class="subject">Tafefa sem contato: Analise de contestação ...</td><td>Pós Saída </td><td>99634</td><td>02/10/2026</td><td>08/10/2026</td><td><span class="status">Em andamento</span></td><td>Cliente pediu retorno</td><td><div class="action-menu-container"><button class="row-action" type="button" aria-label="Ações da tarefa" aria-expanded="false">⌄</button><div class="action-menu" hidden><button type="button" data-action="edit">Editar</button><button class="delete-action" type="button" data-action="delete">Excluir</button></div></div></td>
+            </tr>
+            <tr>
+              <td class="subject">Orientação de vistoria - PP</td><td>Pré Saída PP</td><td>10693</td><td>03/10/2026</td><td>30/10/2026</td><td><span class="status">Em andamento</span></td><td>Ligação sem sucesso</td><td><div class="action-menu-container"><button class="row-action" type="button" aria-label="Ações da tarefa" aria-expanded="false">⌄</button><div class="action-menu" hidden><button type="button" data-action="edit">Editar</button><button class="delete-action" type="button" data-action="delete">Excluir</button></div></div></td>
+            </tr>
+            <tr>
+              <td class="subject">Retenção - PP</td><td>Retenção</td><td>99634</td><td>04/10/2026</td><td>30/10/2026</td><td><span class="status">Em andamento</span></td><td>Aguardando resposta do cliente</td><td><div class="action-menu-container"><button class="row-action" type="button" aria-label="Ações da tarefa" aria-expanded="false">⌄</button><div class="action-menu" hidden><button type="button" data-action="edit">Editar</button><button class="delete-action" type="button" data-action="delete">Excluir</button></div></div></td>
+            </tr>
+            <tr>
+              <td class="subject">Tarefa com contato: Check-out PP ...</td><td>Check-out</td><td>77314</td><td>01/10/2026</td><td>04/10/2026</td><td><span class="status">Em andamento</span></td><td>Sem sucesso, em nova tentativa</td><td><div class="action-menu-container"><button class="row-action" type="button" aria-label="Ações da tarefa" aria-expanded="false">⌄</button><div class="action-menu" hidden><button type="button" data-action="edit">Editar</button><button class="delete-action" type="button" data-action="delete">Excluir</button></div></div></td>
+            </tr>
+            <tr>
+              <td class="subject">Tarefa com contato: Check-out IQ ...</td><td>Check-out</td><td>77314</td><td>01/10/2026</td><td>04/10/2026</td><td><span class="status">Em andamento</span></td><td>Sem sucesso, em nova tentativa</td><td><div class="action-menu-container"><button class="row-action" type="button" aria-label="Ações da tarefa" aria-expanded="false">⌄</button><div class="action-menu" hidden><button type="button" data-action="edit">Editar</button><button class="delete-action" type="button" data-action="delete">Excluir</button></div></div></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="demo">Aguardando configuração da API do CRM</div>
+      <div class="table-footer"><span class="online-dot"></span><span>Omi-Channel</span><span>•</span><span>To Do List</span></div>
+      <p class="demo-note">Exemplo visual — estes registros são demonstrativos e ainda não vêm da API do CRM.</p>
     </section>
-        <button class="robot" id="toggle" aria-label="Abrir assistente">
-      🤖
+  </main>
+
+  <!-- Janela de edição; começa oculta e é exibida ao escolher "Editar". -->
+  <div class="modal-backdrop" id="editBackdrop" hidden>
+    <section class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <h2 id="editTitle">Editar observação</h2>
+      <form id="editForm">
+        <div class="edit-fields">
+          <div class="edit-field">
+            <label for="contactDone">Conseguiu contato?</label>
+            <select id="contactDone">
+              <option>Não</option>
+              <option>Sim</option>
+            </select>
+          </div>
+          <div class="edit-field">
+            <label for="taskStatus">Finalizada?</label>
+            <select id="taskStatus">
+              <option>Em andamento</option>
+              <option>Concluída</option>
+            </select>
+          </div>
+        </div>
+        <p class="modal-subject" id="modalSubject"></p>
+        <div class="observation-field">
+          <label for="taskObservation">Observação</label>
+          <textarea id="taskObservation" autofocus></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancelEdit">Cancelar</button>
+          <button class="save-button" type="submit">Salvar alteração</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <aside class="assistant" aria-label="Assistente de tarefas YODA">
+    <section class="panel" id="panel" aria-live="polite">
+      <header class="assistant-header">
+        <div class="assistant-headrow">
+          <div class="avatar" aria-hidden="true"><img src="assets/baby-yoda-head.png" alt=""></div>
+          <div class="heading"><strong>Assistente YODA</strong><div class="online">Resumo do dia</div></div>
+          <button class="close" id="close" type="button" aria-label="Minimizar assistente">×</button>
+        </div>
+        <p class="welcome">Oi! A lista ficará disponível quando o backend estiver conectado à API do YODA.</p>
+      </header>
+      <div class="summary">Aguardando conexão com a API do YODA</div>
+      <div class="empty-state">Nenhuma tarefa foi carregada. Configure a API do YODA no backend para exibir dados reais.</div>
+      <div class="actions"><button id="acknowledge" type="button">Entendi</button></div>
+    </section>
+    <button class="robot" id="toggle" type="button" aria-label="Abrir assistente">
+      <img src="assets/baby-yoda-head.png" alt="">
     </button>
   </aside>
   <script>
+    // Guarda referências aos elementos usados pelos controles da página.
     var panel = document.getElementById("panel");
-    var taskLinks = document.querySelectorAll(".task");
-    for (var i = 0; i < taskLinks.length; i++) {
-      taskLinks[i].addEventListener("click", function (event) {
-        event.preventDefault();
-        var recordUrl = this.getAttribute("data-record-url");
-        if (recordUrl && /^https?:\/\//i.test(recordUrl)) {
-          window.location.href = recordUrl;
-        } else {
-          window.alert("O link do registro ainda não foi configurado. Conecte o CRM para abrir o contrato relacionado.");
+    var editBackdrop = document.getElementById("editBackdrop");
+    var activeRow = null;
+
+    document.getElementById("close").addEventListener("click", function () {
+      panel.hidden = true;
+    });
+    document.getElementById("acknowledge").addEventListener("click", function () {
+      panel.hidden = true;
+    });
+    document.getElementById("toggle").addEventListener("click", function () {
+      panel.hidden = !panel.hidden;
+    });
+
+    // Configura o menu Editar/Excluir de cada linha da tabela.
+    document.querySelectorAll(".action-menu-container").forEach(function (container) {
+      var trigger = container.querySelector(".row-action");
+      var menu = container.querySelector(".action-menu");
+
+      // Abre o menu desta linha e fecha os menus das outras linhas.
+      trigger.addEventListener("click", function (event) {
+        event.stopPropagation();
+        var willOpen = menu.hidden;
+        document.querySelectorAll(".action-menu").forEach(function (otherMenu) {
+          otherMenu.hidden = true;
+          otherMenu.previousElementSibling.setAttribute("aria-expanded", "false");
+        });
+        menu.hidden = !willOpen;
+        trigger.setAttribute("aria-expanded", String(willOpen));
+      });
+
+      menu.addEventListener("click", function (event) {
+        var action = event.target.dataset.action;
+        var row = container.closest("tr");
+        menu.hidden = true;
+        trigger.setAttribute("aria-expanded", "false");
+
+        // Editar carrega os dados atuais da linha no formulário; excluir remove a linha após confirmação.
+        if (action === "edit") {
+          activeRow = row;
+          document.getElementById("contactDone").value = row.dataset.contactDone || "Não";
+          document.getElementById("taskStatus").value = row.querySelector(".status").textContent.trim();
+          document.getElementById("taskObservation").value = row.cells[6].textContent.trim();
+          document.getElementById("modalSubject").textContent = row.cells[0].textContent.trim();
+          editBackdrop.hidden = false;
+          document.getElementById("taskObservation").focus();
+        } else if (action === "delete" && window.confirm("Deseja excluir esta tarefa?")) {
+          row.remove();
         }
       });
+    });
+
+    // Fecha a janela de edição e limpa a referência à tarefa selecionada.
+    function closeEditModal() {
+      editBackdrop.hidden = true;
+      activeRow = null;
     }
-    document.getElementById("close").addEventListener("click", function () { panel.hidden = true; });
-    document.getElementById("toggle").addEventListener("click", function () { panel.hidden = !panel.hidden; });
-    document.getElementById("acknowledge").addEventListener("click", function () { panel.hidden = true; });
-    
+
+    document.getElementById("cancelEdit").addEventListener("click", closeEditModal);
+    editBackdrop.addEventListener("click", function (event) {
+      if (event.target === editBackdrop) closeEditModal();
+    });
+    // Salva as alterações apenas na tabela exibida nesta página (sem enviar ao YODA).
+    document.getElementById("editForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (!activeRow) return;
+      activeRow.dataset.contactDone = document.getElementById("contactDone").value;
+      activeRow.querySelector(".status").textContent = document.getElementById("taskStatus").value;
+      activeRow.cells[6].textContent = document.getElementById("taskObservation").value || "—";
+      closeEditModal();
+    });
+    document.addEventListener("click", function () {
+      document.querySelectorAll(".action-menu").forEach(function (menu) {
+        menu.hidden = true;
+        menu.previousElementSibling.setAttribute("aria-expanded", "false");
+      });
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeEditModal();
+        document.querySelectorAll(".action-menu").forEach(function (menu) {
+          menu.hidden = true;
+          menu.previousElementSibling.setAttribute("aria-expanded", "false");
+        });
+      }
+    });
   </script>
 </body>
 </html>

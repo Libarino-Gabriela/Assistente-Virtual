@@ -68,10 +68,10 @@ def carregar_tarefas():
             "contato_realizado": "contato_realizado",
             "tipo_contato": "tipo_contato",
             "observacao": "observacao",
-            "criar_proxima_tarefa": "criar_proxima_tarefa",
+                        "criar_proxima_tarefa": "criar_proxima_tarefa",
         }
 
-        if not isinstance(field_map, dict):
+    if not isinstance(field_map, dict):
         raise ValueError("CRM_FIELD_MAP precisa ser um objeto JSON de mapeamento.")
 
     obrigatorios = ("cliente", "titulo", "vencimento", "prioridade", "status")
